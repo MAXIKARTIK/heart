@@ -1,0 +1,33 @@
+body{
+    background:#f4f4f4;
+    font-family:Arial;
+}
+
+.container{
+    width:700px;
+    margin:auto;
+    margin-top:30px;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+}
+
+input,
+select,
+button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+}
+
+button{
+    background:#d32f2f;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+.result{
+    margin-top:20px;
+    text-align:center;
+}
