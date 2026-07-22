@@ -20,12 +20,9 @@ services:
     plan: free
     healthCheckPath: /api/v1/health
     autoDeploy: true
-    # Apply DB migrations, then start the Celery worker (backgrounded) alongside
-    # the API in the same instance.
-    dockerCommand: >-
-      sh -c "alembic upgrade head &&
-      (celery -A app.celery_app:celery_app worker --pool=solo --without-gossip --without-mingle --without-heartbeat --loglevel=warning &
-      uvicorn app.main:app --host 0.0.0.0 --port $PORT)"
+    # Runs migrations, an in-process Celery worker (if REDIS_URL is set), then
+    # the API. Kept in a script file so Render's shell can't mangle operators.
+    dockerCommand: sh /app/backend/start-render.sh
     envVars:
       - key: ENVIRONMENT
         value: production
