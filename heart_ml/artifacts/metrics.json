@@ -1,0 +1,43 @@
+{
+  "selected_model": "DecisionTree",
+  "trained_at": "2026-07-22T07:56:39.146239+00:00",
+  "sklearn_version": "1.9.0",
+  "n_train": 40000,
+  "n_test": 63959,
+  "positive_rate": 0.08559545959130067,
+  "models": {
+    "DecisionTree": {
+      "metrics": {
+        "accuracy": 0.8514204412201567,
+        "precision": 0.28835645229087853,
+        "recall": 0.5011872146118721,
+        "f1": 0.3660863184577413,
+        "roc_auc": 0.8141771811921241,
+        "pr_auc": 0.2974197481139534
+      },
+      "threshold": 0.7055539982940444,
+      "best_params": {
+        "criterion": "entropy",
+        "max_depth": 16,
+        "min_samples_leaf": 100
+      },
+      "cv_pr_auc": 0.28967679385740625
+    },
+    "KNN": {
+      "metrics": {
+        "accuracy": 0.8479025625791523,
+        "precision": 0.2732700714361872,
+        "recall": 0.46812785388127853,
+        "f1": 0.3450922310488757,
+        "roc_auc": 0.7949822204816428,
+        "pr_auc": 0.25380725240377205
+      },
+      "threshold": 0.1641034678038155,
+      "best_params": {
+        "n_neighbors": 51,
+        "weights": "distance"
+      },
+      "cv_pr_auc": 0.25310148652184766
+    }
+  }
+}

@@ -203,18 +203,59 @@ and baseline models.
 
 ---
 
-## Notes on scope & resume alignment
+## Design notes
 
-This deployment focuses on the two algorithms in this notebook — **Decision Tree
-and KNN**. A couple of honest callouts:
-
-- The resume bullet mentions comparing five models (Logistic Regression, Decision
-  Tree, Random Forest, SVM, KNN). This repo ships **DT + KNN**. Two ways to make
-  them consistent: (a) reword the bullet to "compared tree-based and
-  instance-based models (Decision Tree, KNN)", or (b) extend the comparison —
-  `heart_ml/pipeline.py` and `train.py` are model-agnostic, so adding LR/RF/SVM
-  is a small change (a few lines each). Ask and it can be added.
-- The LLM/RAG parts of the resume stack (LangChain, ChromaDB, NVIDIA NIM) are
-  intentionally **not** shoehorned in here — they belong to the agentic projects,
-  not a tabular clinical classifier.
+- **Model choice.** The Decision Tree and KNN are trained and compared on every
+  run; the Decision Tree is deployed because it achieves the best F1 on the
+  held-out test set while staying small and fast to serve. The training code is
+  model-agnostic, so more estimators can be added to the comparison with minimal
+  changes to `heart_ml/pipeline.py` and `heart_ml/train.py`.
+- **One source of truth.** Feature columns and allowed categorical values live in
+  `heart_ml/config.py`; the API schema and the frontend dropdowns mirror them,
+  and an import-time check fails fast if they ever drift apart.
 ```
+
+
+---
+
+## Deploy online (free)
+
+The repo ships a **single-container** image (`Dockerfile.web`) that bundles the
+React frontend into the FastAPI app and relies on the built-in SQLite +
+synchronous-batch fallbacks, so it needs **no external Postgres/Redis** — ideal
+for a free one-service host. (For the full Postgres + Redis + Celery topology,
+run `docker-compose.yml` on a VPS instead.)
+
+Run it locally exactly as a host will:
+
+```bash
+docker build -f Dockerfile.web -t heart-web .
+docker run --rm -p 8000:8000 heart-web
+# UI, API, and /docs all on http://localhost:8000
+```
+
+### Render (recommended)
+
+`render.yaml` is a ready Blueprint for a free web service.
+
+1. Push this repo to GitHub.
+2. Render dashboard → **New + → Blueprint** → select the repo. Render reads
+   `render.yaml`, builds `Dockerfile.web`, and deploys it.
+3. Open the service URL. Health check path: `/api/v1/health`.
+
+Free-tier notes: the service sleeps after ~15 min idle (first hit cold-starts in
+~30–60s) and SQLite is ephemeral (prediction history resets on redeploy) — fine
+for a demo. Render injects `$PORT`; the image already honors it.
+
+### Alternatives
+
+- **Hugging Face Spaces** (Docker SDK): point the Space at `Dockerfile.web` and
+  set the app port to 7860 (`PORT=7860`). Great for ML demos.
+- **Fly.io / Koyeb**: deploy the same `Dockerfile.web` (`fly launch`, or Koyeb
+  “Docker” source).
+
+### Security note
+
+The public demo runs with **no API key** (a same-origin SPA can't keep a key
+secret). Set the `API_KEY` env var to require the `X-API-Key` header when the
+API sits behind a trusted caller rather than a public browser app.

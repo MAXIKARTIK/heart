@@ -1,0 +1,23 @@
+# Render Blueprint - one FREE web service running the single-container image
+# (frontend + API + SQLite + synchronous batch; no Postgres/Redis needed).
+#
+# Deploy: push this repo to GitHub, then in the Render dashboard choose
+# "New +" -> "Blueprint" and select the repository. Render reads this file.
+services:
+  - type: web
+    name: heart-disease-risk
+    runtime: docker
+    dockerfilePath: ./Dockerfile.web
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: "*"
+      # Public demo: API auth disabled (the SPA calls the API from the same
+      # origin). Set a secret here to require the X-API-Key header instead.
+      - key: API_KEY
+        value: ""

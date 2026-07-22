@@ -1,0 +1,45 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Secrets / local config ---
+.env
+
+# --- Databases (local dev) ---
+*.db
+*.sqlite3
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+.vite/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Hypothesis (property-test example DB) ---
+.hypothesis/
+
+# --- Editor / workspace ---
+.kiro/
+
+# --- OS / IDE ---
+.DS_Store
+.idea/
+.vscode/
+
+# NOTE: heart_ml/artifacts/ (44 KB model + metrics + plots) is intentionally
+# committed so the repo is runnable out of the box and the README can show the
+# evaluation plots. Delete this note and add `heart_ml/artifacts/` here if you
+# prefer to always regenerate via `python -m heart_ml.train`.
