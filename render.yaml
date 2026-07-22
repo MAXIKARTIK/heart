@@ -1,8 +1,16 @@
-# Render Blueprint - one FREE web service running the single-container image
-# (frontend + API + SQLite + synchronous batch; no Postgres/Redis needed).
+# Render Blueprint - FULL-FEATURED free deployment.
 #
-# Deploy: push this repo to GitHub, then in the Render dashboard choose
-# "New +" -> "Blueprint" and select the repository. Render reads this file.
+# One free Render web service runs everything: the React frontend (bundled by
+# Dockerfile.web), the FastAPI API, AND a Celery worker (in-process, low-memory
+# "solo" pool). Persistence and the async task queue use free managed services
+# you provide as secrets: DATABASE_URL (e.g. Neon Postgres) and REDIS_URL
+# (e.g. Upstash Redis). With both set, the online app has the SAME features as
+# the local docker-compose stack: Postgres logging + Celery/Redis async batch.
+#
+# This file ONLY affects the online deployment. Local development
+# (docker-compose.yml and the default Dockerfile.web command) is unchanged:
+# without DATABASE_URL/REDIS_URL the app transparently falls back to SQLite +
+# synchronous batch.
 services:
   - type: web
     name: heart-disease-risk
@@ -12,12 +20,23 @@ services:
     plan: free
     healthCheckPath: /api/v1/health
     autoDeploy: true
+    # Apply DB migrations, then start the Celery worker (backgrounded) alongside
+    # the API in the same instance.
+    dockerCommand: >-
+      sh -c "alembic upgrade head &&
+      (celery -A app.celery_app:celery_app worker --pool=solo --without-gossip --without-mingle --without-heartbeat --loglevel=warning &
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT)"
     envVars:
       - key: ENVIRONMENT
         value: production
       - key: CORS_ORIGINS
         value: "*"
-      # Public demo: API auth disabled (the SPA calls the API from the same
-      # origin). Set a secret here to require the X-API-Key header instead.
+      # Public demo: no API key (a same-origin SPA can't keep one secret).
       - key: API_KEY
         value: ""
+      # Set these two in the Render dashboard (Environment tab). Until they are
+      # set the app runs on SQLite + synchronous batch.
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
